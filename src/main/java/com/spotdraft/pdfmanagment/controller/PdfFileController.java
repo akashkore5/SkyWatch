@@ -143,6 +143,7 @@ public class PdfFileController {
 
         return "redirect:/dashboard";
     }
+
     public String generateUniqueLink() {
         // Generate a unique random UUID
         UUID uuid = UUID.randomUUID();
