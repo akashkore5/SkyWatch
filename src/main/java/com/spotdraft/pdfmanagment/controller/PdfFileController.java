@@ -317,54 +317,54 @@ public class PdfFileController {
 //        return "redirect:/view/" + pdfFileId;
 //    }
 
-//    @PostMapping("/comments/add")
-//    public String addCommentToPDF(@RequestParam("pdfFileId") Long pdfFileId, @RequestParam("commentText") String commentText, Principal principal) {
-//        try {
-//            String email = principal.getName();
-//            User user = userRepository.findByEmail(email);
-//            PdfFile pdfFile= pdfFileService.getPdfFileById(pdfFileId);
-//            Comment comment = new Comment(pdfFile,user,commentText); // Create a new comment
-//
-//            pdfFileService.addCommentToPDF(comment, pdfFileId);
-//            return "redirect:/view/" + pdfFileId;
-//        } catch (Exception e) {
-//            return "error";
-//        }
-//    }
+   @PostMapping("/comments/add")
+   public String addCommentToPDF(@RequestParam("pdfFileId") Long pdfFileId, @RequestParam("commentText") String commentText, Principal principal) {
+       try {
+           String email = principal.getName();
+           User user = userRepository.findByEmail(email);
+           PdfFile pdfFile= pdfFileService.getPdfFileById(pdfFileId);
+           Comment comment = new Comment(pdfFile,user,commentText); // Create a new comment
 
-    @PostMapping("/comments/add")
-    public String addCommentToPDF(@RequestParam("pdfFileId") Long pdfFileId,
-                                  @RequestParam("commentText") String commentText,
-                                  @RequestParam(value = "parentId", required = false) Long parentId,
-                                  Principal principal) {
-        try {
-            String email = principal.getName();
-            User user = userRepository.findByEmail(email);
-            PdfFile pdfFile = pdfFileService.getPdfFileById(pdfFileId);
+           pdfFileService.addCommentToPDF(comment, pdfFileId);
+           return "redirect:/view/" + pdfFileId;
+       } catch (Exception e) {
+           return "error";
+       }
+   }
 
-            if (parentId != null) {
-                // If parentId is provided, it means it's a reply
-                Comment parentComment = commentService.getCommentById(parentId);
-                if (parentComment == null) {
-                    // Handle case when parent comment is not found
-                    return "error";
-                }
+//     @PostMapping("/comments/add")
+//     public String addCommentToPDF(@RequestParam("pdfFileId") Long pdfFileId,
+//                                   @RequestParam("commentText") String commentText,
+//                                   @RequestParam(value = "parentId", required = false) Long parentId,
+//                                   Principal principal) {
+//         try {
+//             String email = principal.getName();
+//             User user = userRepository.findByEmail(email);
+//             PdfFile pdfFile = pdfFileService.getPdfFileById(pdfFileId);
 
-                Comment reply = new Comment(pdfFile, user, commentText); // Create a new reply
-                parentComment.addReply(reply); // Add the reply to the parent comment
+//             if (parentId != null) {
+//                 // If parentId is provided, it means it's a reply
+//                 Comment parentComment = commentService.getCommentById(parentId);
+//                 if (parentComment == null) {
+//                     // Handle case when parent comment is not found
+//                     return "error";
+//                 }
 
-                pdfFileService.addCommentToPDF(reply, pdfFileId);
-            } else {
-                // It's a new comment
-                Comment comment = new Comment(pdfFile, user, commentText); // Create a new comment
-                pdfFileService.addCommentToPDF(comment, pdfFileId);
-            }
+//                 Comment reply = new Comment(pdfFile, user, commentText); // Create a new reply
+//                 parentComment.addReply(reply); // Add the reply to the parent comment
 
-            return "redirect:/view/" + pdfFileId;
-        } catch (Exception e) {
-            return "error";
-        }
-    }
+//                 pdfFileService.addCommentToPDF(reply, pdfFileId);
+//             } else {
+//                 // It's a new comment
+//                 Comment comment = new Comment(pdfFile, user, commentText); // Create a new comment
+//                 pdfFileService.addCommentToPDF(comment, pdfFileId);
+//             }
+
+//             return "redirect:/view/" + pdfFileId;
+//         } catch (Exception e) {
+//             return "error";
+//         }
+//     }
 
 
 
