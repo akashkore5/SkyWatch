@@ -18,13 +18,13 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Comment parent;
+//     @ManyToOne(fetch = FetchType.LAZY)
+//     @JoinColumn(name = "parent_id")
+//     private Comment parent;
 
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> replies = new ArrayList<>();
+//     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+//     private List<Comment> replies = new ArrayList<>();
 
 
 
@@ -75,35 +75,35 @@ public class Comment {
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
-    public List<Comment> getReplies() {
-        return replies;
-    }
+//     public List<Comment> getReplies() {
+//         return replies;
+//     }
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
-    public void addReply(Comment reply) {
-        replies.add(reply);
-        reply.setParent(this);
-    }
+//     public void addReply(Comment reply) {
+//         replies.add(reply);
+//         reply.setParent(this);
+//     }
 
-    public void removeReply(Comment reply) {
-        replies.remove(reply);
-        reply.setParent(null);
-    }
+//     public void removeReply(Comment reply) {
+//         replies.remove(reply);
+//         reply.setParent(null);
+//     }
 
 
-    public Comment getParent() {
-        return parent;
-    }
+//     public Comment getParent() {
+//         return parent;
+//     }
 
-    public void setParent(Comment parent) {
-        this.parent = parent;
-    }
+//     public void setParent(Comment parent) {
+//         this.parent = parent;
+//     }
 
-    public void setReplies(List<Comment> replies) {
-        this.replies=replies;
-    }
+//     public void setReplies(List<Comment> replies) {
+//         this.replies=replies;
+//     }
 
     // Constructors, getters, and setters
 }
