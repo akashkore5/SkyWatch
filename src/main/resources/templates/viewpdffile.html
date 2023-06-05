@@ -211,6 +211,9 @@
         var hiddenCommentTextarea = document.getElementById('hiddenCommentText');
         hiddenCommentTextarea.value = commentTextarea.value;
 
+if (commentTextarea.value.trim() === '') {
+        return; // Stop further execution
+    }
         // Submit the form programmatically
         var form = document.querySelector('.comment-form');
         form.submit();

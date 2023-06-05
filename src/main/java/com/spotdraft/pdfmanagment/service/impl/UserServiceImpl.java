@@ -8,16 +8,22 @@ import com.spotdraft.pdfmanagment.model.User;
 import com.spotdraft.pdfmanagment.repository.RoleRepository;
 import com.spotdraft.pdfmanagment.repository.UserRepository;
 import com.spotdraft.pdfmanagment.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
+    @Autowired
+    private EntityManager entityManager;
 
     private UserRepository userRepository;
     private RoleRepository roleRepository;
@@ -38,8 +44,22 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userDto.getEmail());
         // encrypt the password using spring security
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        String tableName = "roles";
+        Query query = entityManager.createNativeQuery("SELECT 1 FROM " + tableName + " LIMIT 1");
 
-        Role role = roleRepository.findByName("ROLE_ADMIN");
+        boolean tableExists;
+        try {
+            query.getSingleResult();
+            tableExists = true;
+        } catch (Exception ex) {
+            tableExists = false;
+        }
+
+        Role role = new Role();
+        if(tableExists) {
+            role = roleRepository.findByName("ROLE_ADMIN");
+        }
+        role.setName("ROLE_ADMIN");
         if(role == null){
             role = checkRoleExist();
         }
@@ -96,4 +116,5 @@ public class UserServiceImpl implements UserService {
         customer.setResetPasswordToken(null);
         userRepository.save(customer);
     }
+
 }

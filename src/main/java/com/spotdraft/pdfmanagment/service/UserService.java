@@ -4,6 +4,7 @@ import com.spotdraft.pdfmanagment.dto.UserDto;
 import com.spotdraft.pdfmanagment.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
     void saveUser(UserDto userDto);
@@ -17,4 +18,5 @@ public interface UserService {
     User getByResetPasswordToken(String token);
 
     void updatePassword(User customer, String password);
+
 }

@@ -102,6 +102,12 @@
     </div>
     <div class="login-section">
         <div class="container">
+            <div th:if="${param.error}">
+                <div class="alert alert-danger">Invalid Email or Password</div>
+            </div>
+            <div th:if="${param.logout}">
+                <div class="alert alert-success"> You have been logged out.</div>
+            </div>
             <div class="card">
                 <div class="card-header">
                     <h2 class="login-form-heading"><i class="login-form-icon fas fa-lock"></i>Login Form</h2>
