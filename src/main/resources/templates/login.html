@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .content-section {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .intro-section {
+            flex: 1 1 50%;
+            padding: 40px;
+            background-color: #e9ecef;
+            text-align: center;
+        }
+
+        .intro-heading {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .intro-description {
+            font-size: 18px;
+            color: #6c757d;
+        }
+
+        .login-section {
+            flex: 1 1 50%;
+            padding: 40px;
+            background-color: #d1d8e0;
+        }
+
+        .login-section .card {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .login-form-heading {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .login-form-icon {
+            margin-right: 10px;
+        }
+
+        .footer {
+            background-color: #c8ced3;
+            padding: 10px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .content-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .intro-section,
+            .login-section {
+                flex: 1 1 100%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/login}">PDF Management System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+<div class="content-section">
+    <div class="intro-section">
+        <div class="container">
+            <h1 class="intro-heading">Welcome to the PDF Management & Collaboration System</h1>
+            <p class="intro-description">The PDF Management & Collaboration System is a web application designed to facilitate the seamless management and collaboration of PDFs. With this system, users can easily upload, organize, and share their PDF files with others. The system also enables collaborative features such as commenting, annotations, and version control, making it a powerful tool for teams and individuals working with PDF documents. Experience the convenience and efficiency of managing PDFs with our intuitive and user-friendly platform.</p>
+        </div>
+    </div>
+    <div class="login-section">
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="login-form-heading"><i class="login-form-icon fas fa-lock"></i>Login Form</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" role="form"
+                          th:action="@{/login(targetUrl=${targetUrl != null ? targetUrl : ''})}"
+                          class="form-horizontal">
+                        <div class="form-group mb-3">
+                            <label class="control-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="text" id="username" name="username" class="form-control"
+                                       placeholder="Enter email address" />
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="control-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" id="password" name="password" class="form-control"
+                                       placeholder="Enter password" />
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="targetUrl" th:value="${session.targetUrl}" />
+                        <div class="form-group mb-3">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <span class="register-button"><a th:href="@{/register}">Register Here</a></span>
+                            <span><a th:href="@{/forgot_password}">Forgot password?</a></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer class="footer">
+    <div class="container text-center">
+        <p>&copy; 2023 PDF Management & Collaboration System. All rights reserved.</p>
+    </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-9ZSIqH9UhC84KQ7l0zvjjrrC8hJO8VYSC55W4yDff6xu/C9scc+5T/z1RPOna/AT"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

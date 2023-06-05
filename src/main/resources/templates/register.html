@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/your-font-awesome-key.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding:20px;
+        }
+        .row{
+        width:600px;
+        }
+
+        .card {
+            max-width: 800px;
+        }
+
+        .card-header {
+            background-color: #343a40;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .card-title {
+            margin-bottom: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            width: 100%;
+        }
+
+        .text-danger {
+            color: red;
+        }
+
+        .footer {
+            background-color: #343a40;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            bottom: 0;
+            width: 100%;
+        }
+        @media (max-width: 576px) {
+  /* Extra small devices (phones) */
+  .row {
+    width: 100%;
+    padding: 0 15px; /* Optional: Add padding to the sides */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Small devices (tablets) */
+  .row {
+    width: 100%;
+    padding: 0 15px; /* Optional: Add padding to the sides */
+  }
+}
+
+@media (max-width: 992px) {
+  /* Medium devices (laptops, desktops) */
+  .row {
+    width: 80%;
+    padding: 0 15px; /* Optional: Add padding to the sides */
+  }
+}
+
+@media (max-width: 1200px) {
+  /* Large devices (large desktops) */
+  .row {
+    width: 100%;
+    padding: 0 15px; /* Optional: Add padding to the sides */
+  }
+}
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/index">PDF Managment System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Registration</h2>
+                </div>
+                <div th:if="${param.success}">
+                    <div class="alert alert-info">
+                        You have successfully registered for our app!
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" role="form" th:action="@{/register/save}" th:object="${user}">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input class="form-control" id="firstName" name="firstName" placeholder="Enter first name"
+                                       th:field="*{firstName}" type="text" required>
+                            </div>
+                            <p th:errors="*{firstName}" class="text-danger" th:if="${#fields.hasErrors('firstName')}"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input class="form-control" id="lastName" name="lastName" placeholder="Enter last name"
+                                       th:field="*{lastName}" type="text" required>
+                            </div>
+                            <p th:errors="*{lastName}" class="text-danger" th:if="${#fields.hasErrors('lastName')}"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input class="form-control" id="email" name="email" placeholder="Enter email address"
+                                       th:field="*{email}" type="email" required oninput="validateEmail()">
+                            </div>
+                            <p th:errors="*{email}" class="text-danger" th:if="${#fields.hasErrors('email')}"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input class="form-control" id="password" name="password" placeholder="Enter password"
+                                       th:field="*{password}" type="password" required oninput="checkPasswordRequirements()">
+                            </div>
+                            <p id="passwordRequirements" class="text-danger">✕ At least 8 characters<br>✕ At least 1 uppercase letter<br>✕ At least 1 lowercase letter<br>✕ At least 1 digit</p>
+                            <p th:errors="*{password}" class="text-danger" th:if="${#fields.hasErrors('password')}"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <button id="submitButton" class="btn btn-primary" type="submit" disabled>Register</button>
+                            <br><br>
+                            <span>Already registered? <a href="/login">Login here</a></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>&copy; 2023 PDF Managment System. All rights reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/js/all.min.js"></script>
+<script>
+    function validateEmail() {
+        var email = document.getElementById("email").value;
+        var emailError = document.getElementById("emailError");
+        var submitButton = document.getElementById("submitButton");
+
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            emailError.textContent = "Invalid email address!";
+            document.getElementById("email").classList.add("input-error");
+            submitButton.disabled = true;
+        } else {
+            emailError.textContent = "";
+            document.getElementById("email").classList.remove("input-error");
+            submitButton.disabled = false;
+        }
+    }
+
+    document.getElementById("password").addEventListener("input", function () {
+        checkPasswordRequirements();
+    });
+
+    function checkPasswordRequirements() {
+        var password = document.getElementById("password").value;
+        var passwordRequirements = document.getElementById("passwordRequirements");
+        var submitButton = document.getElementById("submitButton");
+
+        var requirementsMet = true;
+
+        // Check password length
+        if (password.length < 8) {
+            requirementsMet = false;
+            passwordRequirements.innerHTML = "✕ At least 8 characters<br>";
+        } else {
+            passwordRequirements.innerHTML = "✓ At least 8 characters<br>";
+        }
+
+        // Check for uppercase letter
+        if (!/[A-Z]/.test(password)) {
+            requirementsMet = false;
+            passwordRequirements.innerHTML += "✕ At least 1 uppercase letter<br>";
+        } else {
+            passwordRequirements.innerHTML += "✓ At least 1 uppercase letter<br>";
+        }
+
+        // Check for lowercase letter
+        if (!/[a-z]/.test(password)) {
+            requirementsMet = false;
+            passwordRequirements.innerHTML += "✕ At least 1 lowercase letter<br>";
+        } else {
+            passwordRequirements.innerHTML += "✓ At least 1 lowercase letter<br>";
+        }
+
+        // Check for digit
+        if (!/[0-9]/.test(password)) {
+            requirementsMet = false;
+            passwordRequirements.innerHTML += "✕ At least 1 digit";
+        } else {
+            passwordRequirements.innerHTML += "✓ At least 1 digit";
+        }
+
+        if (requirementsMet) {
+            passwordRequirements.classList.remove("text-danger");
+            passwordRequirements.classList.add("text-success");
+            submitButton.disabled = false;
+        } else {
+            passwordRequirements.classList.remove("text-success");
+            passwordRequirements.classList.add("text-danger");
+            submitButton.disabled = true;
+        }
+    }
+</script>
+</body>
+</html>
