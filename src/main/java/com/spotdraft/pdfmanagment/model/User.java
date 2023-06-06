@@ -43,11 +43,6 @@ public class User {
     )
     private List<Role> roles = new ArrayList<>();
 
-    // Constructors, getters, and setters
-
-    public User() {
-    }
-
     /**
      * Creates a new User with the provided name, email, password, and roles.
      *
