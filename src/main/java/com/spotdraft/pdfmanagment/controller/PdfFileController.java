@@ -474,7 +474,7 @@ public class PdfFileController {
 
     @PostMapping("/share")
     public String shareFile(@RequestParam("email") String email,
-                            @RequestParam("pdfFileId") Long pdfFileId) throws MessagingException, UnsupportedEncodingException {
+                            @RequestParam("pdfFileId") Long pdfFileId,Model model) throws MessagingException, UnsupportedEncodingException {
         // Validate the email and PDF file ID
         if (email.isEmpty()) {
             // Handle empty email
@@ -489,14 +489,29 @@ public class PdfFileController {
 
         // Generate a unique link for sharing
         String uniqueLink = pdfFile.get().getUniqueLink();
+        PdfFile pdffile=pdfFile.get();
 
 
         // Send an email to the provided email address with the unique link
         sendShareEmail(email, uniqueLink);
 
-        // Redirect to the Dashboard page or a success message page
-//        return "redirect:/view/" + pdfFileId;
-        return "viewpdffile";
+        if (pdffile != null) {
+
+            // Convert the byte array to Base64 string
+            String base64Data = Base64.getEncoder().encodeToString(pdffile.getData());
+
+            // Pass the base64Data to the viewpdffile.html template
+            model.addAttribute("base64Data", base64Data);
+            model.addAttribute("pdfFile", pdffile);
+            return "viewpdffile";
+        } else {
+            // Handle the case when the PdfFile does not exist
+
+
+            model.addAttribute("error", "The requested PDF file is not present");
+            model.addAttribute("message", "please select valid PDF file from list");
+            return "error"; // You can create an error.html template to display an error message
+        }
     }
 
 
