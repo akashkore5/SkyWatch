@@ -495,8 +495,10 @@ public class PdfFileController {
         sendShareEmail(email, uniqueLink);
 
         // Redirect to the Dashboard page or a success message page
-        return "redirect:/view/" + pdfFileId;
+//        return "redirect:/view/" + pdfFileId;
+        return "viewpdffile";
     }
+
 
     @GetMapping("/view/{uniqueCode}")
     public String viewPDF(@PathVariable("uniqueCode") String uniqueCode, Model model) {
