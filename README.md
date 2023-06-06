@@ -54,9 +54,3 @@ The PDF Management & Collaboration System is a web application designed to facil
 - Users should be able to reply to existing comments.
 - The system should support basic text formatting options (bold, italic, bullet points) for comments.
 
-## Deliverables
-
-1. A working application that has been deployed and is available publicly.
-2. Video/s showcasing the features of the application.
-3. Code uploaded to a GitHub repository with appropriate documentation.
-
