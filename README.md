@@ -1,7 +1,6 @@
 # PdfManagmentSystem
 SpotDRAFT - Junior Software Engineer - Assignment
 PDF Management & Collaboration System
-Requirements
 Must-Have Features
 1. Introduction:
 a. The PDF Management & Collaboration System is a web application designed
