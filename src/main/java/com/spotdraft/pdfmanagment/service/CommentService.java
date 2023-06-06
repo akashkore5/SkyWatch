@@ -17,23 +17,41 @@ public class CommentService {
         this.commentRepository = commentRepository;
     }
 
+    /**
+     * Saves a comment.
+     *
+     * @param comment The comment to be saved.
+     * @return The saved comment.
+     */
     public Comment saveComment(Comment comment) {
         return commentRepository.save(comment);
     }
 
-//    public Comment getCommentById(Long commentId) {
-//        return commentRepository.findById(commentId)
-//                .orElseThrow(() -> new NotFoundException("Comment not found"));
-//    }
-
+    /**
+     * Deletes a comment.
+     *
+     * @param comment The comment to be deleted.
+     */
     public void deleteComment(Comment comment) {
         commentRepository.delete(comment);
     }
 
+    /**
+     * Retrieves a comment by its ID.
+     *
+     * @param commentId The ID of the comment.
+     * @return The comment if found, otherwise null.
+     */
     public Comment getCommentById(Long commentId) {
         return commentRepository.findById(commentId).orElse(null);
     }
 
+    /**
+     * Retrieves the replies for a comment by its ID.
+     *
+     * @param commentId The ID of the comment.
+     * @return Optional containing the list of replies if found, otherwise an empty optional.
+     */
     public Optional<Comment> getRepliesForComment(Long commentId) {
         // Retrieve the replies for the given commentId from the database or any other data source
         // Return the list of replies
@@ -41,5 +59,4 @@ public class CommentService {
 
         return commentRepository.findById(commentId);
     }
-
 }

@@ -23,18 +23,33 @@ public class SpringSecurity {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    /**
+     * Configures the password encoder to use BCrypt algorithm.
+     *
+     * @return The BCrypt password encoder.
+     */
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Configures the security filter chain for HTTP requests.
+     *
+     * @param http The HttpSecurity object.
+     * @return The configured SecurityFilterChain.
+     * @throws Exception If an error occurs during configuration.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests((authorize) ->
                         authorize
+                                // Public URLs accessible to all
                                 .requestMatchers(getPublicRequestMatchers()).permitAll()
+                                // URL accessible only by users with ADMIN role
                                 .requestMatchers(new AntPathRequestMatcher("/")).hasRole("ADMIN")
+                                // All other URLs require authentication
                                 .anyRequest().authenticated()
                 )
                 .formLogin(
@@ -43,6 +58,7 @@ public class SpringSecurity {
                                 .loginProcessingUrl("/login")
                                 .defaultSuccessUrl("/dashboard", true)
                                 .successHandler((request, response, authentication) -> {
+                                    // Redirect to the requested URL after successful login
                                     String targetUrl = request.getParameter("targetUrl");
                                     if (targetUrl != null && !targetUrl.isEmpty()) {
                                         response.sendRedirect(targetUrl);
@@ -60,6 +76,11 @@ public class SpringSecurity {
         return http.build();
     }
 
+    /**
+     * Retrieves an array of public request matchers for URLs that don't require authentication.
+     *
+     * @return An array of RequestMatchers for public URLs.
+     */
     private RequestMatcher[] getPublicRequestMatchers() {
         List<RequestMatcher> requestMatchers = Arrays.asList(
                 new AntPathRequestMatcher("/register/**"),
@@ -67,7 +88,6 @@ public class SpringSecurity {
                 new AntPathRequestMatcher("/users"),
                 new AntPathRequestMatcher("/dashboard"),
                 new AntPathRequestMatcher("/dashboard/**"),
-                new AntPathRequestMatcher("/view/**"),
                 new AntPathRequestMatcher("/shared/**"),
                 new AntPathRequestMatcher("/forgot_password"),
                 new AntPathRequestMatcher("/reset_password"),
@@ -79,6 +99,12 @@ public class SpringSecurity {
         return requestMatchers.toArray(new RequestMatcher[0]);
     }
 
+    /**
+     * Configures the global authentication manager.
+     *
+     * @param auth The AuthenticationManagerBuilder object.
+     * @throws Exception If an error occurs during configuration.
+     */
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth

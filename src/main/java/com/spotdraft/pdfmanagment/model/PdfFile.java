@@ -1,9 +1,7 @@
 package com.spotdraft.pdfmanagment.model;
 
-
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -36,17 +34,25 @@ public class PdfFile {
     @OneToMany(mappedBy = "pdfFile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    // Constructors, getters, and setters
-
     public PdfFile() {
     }
 
+    /**
+     * Creates a new PdfFile with the provided file name, file type, data, and user.
+     *
+     * @param fileName The name of the PDF file.
+     * @param fileType The type of the PDF file.
+     * @param data     The binary data of the PDF file.
+     * @param user     The User associated with the PDF file.
+     */
     public PdfFile(String fileName, String fileType, byte[] data, User user) {
         this.fileName = fileName;
         this.fileType = fileType;
         this.data = data;
         this.user = user;
     }
+
+    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -122,10 +128,11 @@ public class PdfFile {
                 "id=" + id +
                 ", fileName='" + fileName + '\'' +
                 ", fileType='" + fileType + '\'' +
-                ", data=" + Arrays.toString(data) +
                 ", user=" + user +
                 '}';
     }
+
+    // Uncomment the equals() and hashCode() methods if needed
 
 //    @Override
 //    public boolean equals(Object obj) {

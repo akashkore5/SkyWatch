@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+/**
+ * Custom implementation of UserDetailsService for loading user details during authentication.
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -22,23 +25,37 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Loads user details based on the provided email.
+     *
+     * @param email the email of the user to load
+     * @return the UserDetails object representing the authenticated user
+     * @throws UsernameNotFoundException if the user is not found
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email);
 
         if (user != null) {
-            return new org.springframework.security.core.userdetails.User(user.getEmail(),
+            return new org.springframework.security.core.userdetails.User(
+                    user.getEmail(),
                     user.getPassword(),
-                    mapRolesToAuthorities(user.getRoles()));
-        }else{
+                    mapRolesToAuthorities(user.getRoles())
+            );
+        } else {
             throw new UsernameNotFoundException("Invalid username or password.");
         }
     }
 
-    private Collection < ? extends GrantedAuthority> mapRolesToAuthorities(Collection <Role> roles) {
-        Collection < ? extends GrantedAuthority> mapRoles = roles.stream()
+    /**
+     * Maps user roles to Spring Security GrantedAuthority objects.
+     *
+     * @param roles the collection of roles associated with the user
+     * @return the collection of GrantedAuthority objects representing the roles
+     */
+    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
+        return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
-        return mapRoles;
     }
 }

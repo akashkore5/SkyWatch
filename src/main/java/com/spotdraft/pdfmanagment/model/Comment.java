@@ -1,12 +1,12 @@
 package com.spotdraft.pdfmanagment.model;
 
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
 public class Comment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,6 +26,13 @@ public class Comment {
     public Comment() {
     }
 
+    /**
+     * Creates a new Comment with the provided PdfFile, User, and text.
+     *
+     * @param pdfFile The PdfFile associated with the comment.
+     * @param user    The User who made the comment.
+     * @param text    The content of the comment.
+     */
     public Comment(PdfFile pdfFile, User user, String text) {
         this.pdfFile = pdfFile;
         this.user = user;
