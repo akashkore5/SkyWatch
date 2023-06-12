@@ -145,7 +145,7 @@ public class AuthController {
 
             if(result.hasErrors()){
                 model.addAttribute("user", userDto);
-                return "/register";
+                return "register";
             }
 
 
@@ -156,7 +156,7 @@ public class AuthController {
         userService.saveUser(userDto,token);
 
         model.addAttribute("message", "We have send link to verify your Email! Verify and login Now");
-        return "/register";
+        return "register";
     }
 
     private void sendVerificationEmail(String recipientEmail, String verificationToken)
