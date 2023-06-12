@@ -86,6 +86,8 @@ public class SpringSecurity {
                 new AntPathRequestMatcher("/register/**"),
                 new AntPathRequestMatcher("/index"),
                 new AntPathRequestMatcher("/verify"),
+                new AntPathRequestMatcher("/view"),
+                new AntPathRequestMatcher("/dashboard"),
                 new AntPathRequestMatcher("/dashboard/**"),
                 new AntPathRequestMatcher("/shared/**"),
                 new AntPathRequestMatcher("/forgot_password"),
