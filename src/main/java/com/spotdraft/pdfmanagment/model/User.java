@@ -43,6 +43,13 @@ public class User {
     )
     private List<Role> roles = new ArrayList<>();
 
+    @Column(nullable = false)
+    private boolean verified;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+
     /**
      * Creates a new User with the provided name, email, password, and roles.
      *

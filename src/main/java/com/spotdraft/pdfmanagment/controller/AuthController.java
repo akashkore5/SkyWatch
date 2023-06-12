@@ -1,21 +1,17 @@
 package com.spotdraft.pdfmanagment.controller;
 
 import com.spotdraft.pdfmanagment.dto.UserDto;
-import com.spotdraft.pdfmanagment.exception.UserNotFoundException;
 import com.spotdraft.pdfmanagment.model.User;
 import com.spotdraft.pdfmanagment.service.UserService;
 import com.spotdraft.pdfmanagment.utility.Utility;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
-import javax.persistence.metamodel.Metamodel;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
-import org.hibernate.boot.spi.MetadataImplementor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -42,8 +38,11 @@ public class AuthController {
 
     private UserService userService;
 
-    public AuthController(UserService userService) {
+    private final HttpServletRequest request;
+
+    public AuthController(UserService userService, HttpServletRequest request) {
         this.userService = userService;
+        this.request = request;
     }
 
     // handler method to handle home page request
@@ -70,13 +69,19 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String processLogin(@RequestParam("email") String email,@RequestParam(value = "targetUrl", required = false) String targetUrl, Model model,HttpServletRequest request) {
+    public String processLogin(@RequestParam(value = "targetUrl", required = false) String targetUrl, Model model,HttpServletRequest request) {
         // Perform the login logic here
 
 
-        User user = userService.findUserByEmail(email);
+        User user = userService.findUserByEmail("email");
         HttpSession session = request.getSession();
-        session.setAttribute("userId", user.getId());
+//        session.setAttribute("userId", user.getId());
+
+        if (!user.isVerified()) {
+            model.addAttribute("error", "Account not verified");
+            model.addAttribute("message", "Please verify your email address to login.");
+            return "login";
+        }
 
         targetUrl = (String) session.getAttribute("targetUrl");
 //        if (targetUrl == null && targetUrl.isEmpty()) {
@@ -110,14 +115,14 @@ public class AuthController {
         // create model object to store form data
         model.addAttribute("error", "Got Unexpected error");
         model.addAttribute("message", "Please try again ...");
-        return "register";
+        return "error";
     }
 
     // handler method to handle user registration form submit request
     @PostMapping("/register/save")
     public String registration(@Valid @ModelAttribute("user") UserDto userDto,
                                BindingResult result,
-                               Model model){
+                               Model model) throws MessagingException, UnsupportedEncodingException {
 
         String tableName = "users";
         Query query = entityManager.createNativeQuery("SELECT 1 FROM " + tableName + " LIMIT 1");
@@ -145,54 +150,26 @@ public class AuthController {
 
 
         }
-        userService.saveUser(userDto);
-        return "redirect:/login";
+
+        String token=UUID.randomUUID().toString();
+        sendVerificationEmail(userDto.getEmail(),token);
+        userService.saveUser(userDto,token);
+
+        model.addAttribute("message", "We have send link to verify your Email! Verify and login Now");
+        return "/register";
     }
 
-    // handler method to handle list of users
-    @GetMapping("/users")
-    public String users(Model model){
-        List<UserDto> users = userService.findAllUsers();
-        model.addAttribute("users", users);
-        return "users";
-    }
-
-    @GetMapping("/forgot_password")
-    public String showForgotPasswordForm() {
-        return "forgot_password_form";
-
-    }
-
-    @PostMapping("/forgot_password")
-    public String processForgotPassword(HttpServletRequest request, Model model) {
-        String email = request.getParameter("email");
-        String token = UUID.randomUUID().toString();
-
-        try {
-            userService.updateResetPasswordToken(token, email);
-            String resetPasswordLink = Utility.getSiteURL(request) + "/reset_password?token=" + token;
-            sendEmail(email, resetPasswordLink);
-            model.addAttribute("message", "We have sent a reset password link to your email. Please check.");
-
-        } catch (UserNotFoundException ex) {
-            model.addAttribute("error", ex.getMessage());
-        } catch (UnsupportedEncodingException | MessagingException e) {
-            model.addAttribute("error", "Error while sending email");
-        }
-
-        return "forgot_password_form";
-    }
-
-    public void sendEmail(String recipientEmail, String link)
-            throws MessagingException, UnsupportedEncodingException {
+    private void sendVerificationEmail(String recipientEmail, String verificationToken)
+            throws MessagingException, UnsupportedEncodingException{
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
 
-        helper.setFrom("support@spotdraft.com", "Password Reset");
+        String link = Utility.getSiteURL(request) + "/verify?token=" + verificationToken;
+
+        helper.setFrom("support@spotdraft.com", "Account Verification");
         helper.setTo(recipientEmail);
 
-        String subject = "Here's the link to reset your password";
-
+        String subject = "Here's the link to verify your account";
         String content = "<!DOCTYPE html>\n" +
                 "<html xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" lang=\"en\">\n" +
                 "\n" +
@@ -250,7 +227,6 @@ public class AuthController {
                 "\t\t\t\tmargin: 0 auto;\n" +
                 "\t\t\t}\n" +
                 "\n" +
-                "\t\t\t.image_block img.big,\n" +
                 "\t\t\t.row-content {\n" +
                 "\t\t\t\twidth: 100% !important;\n" +
                 "\t\t\t}\n" +
@@ -310,30 +286,18 @@ public class AuthController {
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"image_block block-2\" width=\"100%\" border=\"0\" cellpadding=\"20\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"alignment\" align=\"center\" style=\"line-height:10px\"><img class=\"big\" src=\"https://d1oco4z2z1fhwp.cloudfront.net/templates/default/2971/lock5.png\" style=\"display: block; height: auto; border: 0; width: 358px; max-width: 100%;\" width=\"358\" alt=\"Forgot your password?\" title=\"Forgot your password?\"></div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"alignment\" align=\"center\" style=\"line-height:10px\"><img src=\"https://6b0de258b8.imgdist.com/public/users/Integrators/BeeProAgency/1002177_986991/child-s-artwork-in-picture-frame-6941688.jpg\" style=\"display: block; height: auto; border: 0; width: 260px; max-width: 100%;\" width=\"260\" alt=\"Forgot your password?\" title=\"Forgot your password?\"></div>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"heading_block block-3\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"padding-top:35px;text-align:center;width:100%;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<h1 style=\"margin: 0; color: #8412c0; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 28px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0;\"><strong>Forgot your password?</strong></h1>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<h1 style=\"margin: 0; color: #8412c0; direction: ltr; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 28px; font-weight: 400; letter-spacing: normal; line-height: 120%; text-align: center; margin-top: 0; margin-bottom: 0;\"><span class=\"tinyMce-placeholder\">Verify your Account !</span></h1>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"text_block block-4\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"padding-left:45px;padding-right:45px;padding-top:10px;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div style=\"font-family: Arial, sans-serif\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class style=\"font-size: 12px; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; mso-line-height-alt: 18px; color: #393d47; line-height: 1.5;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; text-align: center; mso-line-height-alt: 27px;\"><span style=\"font-size:18px;color:#aa67cf;\">We received a request to reset your password.</span></p>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; text-align: center; mso-line-height-alt: 27px;\"><span style=\"font-size:18px;color:#aa67cf;\">If you didn't make this request, simply ignore this email.</span></p>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"divider_block block-5\" width=\"100%\" border=\"0\" cellpadding=\"20\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"divider_block block-4\" width=\"100%\" border=\"0\" cellpadding=\"20\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"alignment\" align=\"center\">\n" +
@@ -346,41 +310,30 @@ public class AuthController {
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"text_block block-6\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"text_block block-5\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"padding-bottom:10px;padding-left:45px;padding-right:45px;padding-top:10px;\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div style=\"font-family: Arial, sans-serif\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class style=\"font-size: 12px; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; mso-line-height-alt: 18px; color: #393d47; line-height: 1.5;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; text-align: center; mso-line-height-alt: 18px;\"><strong><span style=\"font-size:13px;color:#8412c0;\">If you did make this request just click the button below:</span></strong></p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class style=\"font-size: 12px; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; mso-line-height-alt: 18px; color: #0068a5; line-height: 1.5;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; text-align: center; mso-line-height-alt: 24px;\"><span style=\"font-size:16px;\">Click the link below to verify your account</span></p>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"button_block block-7\" width=\"100%\" border=\"0\" cellpadding=\"10\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"button_block block-6\" width=\"100%\" border=\"0\" cellpadding=\"10\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"alignment\" align=\"center\"><!--[if mso]><v:roundrect xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" href=\""+link+"\" style=\"height:50px;width:223px;v-text-anchor:middle;\" arcsize=\"0%\" strokeweight=\"0.75pt\" strokecolor=\"#8412c0\" fillcolor=\"#8412c0\"><w:anchorlock/><v:textbox inset=\"0px,0px,0px,0px\"><center style=\"color:#ffffff; font-family:Arial, sans-serif; font-size:14px\"><![endif]--><a href=\""+link+"\" target=\"_blank\" style=\"text-decoration:none;display:inline-block;color:#ffffff;background-color:#8412c0;border-radius:0px;width:auto;border-top:1px solid transparent;font-weight:400;border-right:1px solid transparent;border-bottom:1px solid transparent;border-left:1px solid transparent;padding-top:10px;padding-bottom:10px;font-family:'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:14px;text-align:center;mso-border-alt:none;word-break:keep-all;\"><span style=\"padding-left:40px;padding-right:40px;font-size:14px;display:inline-block;letter-spacing:normal;\"><span style=\"word-break:break-word;\"><span style=\"line-height: 28px;\" data-mce-style>RESET MY PASSWORD</span></span></span></a><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"alignment\" align=\"center\"><!--[if mso]><v:roundrect xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" href=\""+link+"\" style=\"height:50px;width:164px;v-text-anchor:middle;\" arcsize=\"0%\" strokeweight=\"0.75pt\" strokecolor=\"#8412c0\" fillcolor=\"#8412c0\"><w:anchorlock/><v:textbox inset=\"0px,0px,0px,0px\"><center style=\"color:#ffffff; font-family:Arial, sans-serif; font-size:14px\"><![endif]--><a href=\""+link+"\" target=\"_blank\" style=\"text-decoration:none;display:inline-block;color:#ffffff;background-color:#8412c0;border-radius:0px;width:auto;border-top:1px solid transparent;font-weight:400;border-right:1px solid transparent;border-bottom:1px solid transparent;border-left:1px solid transparent;padding-top:10px;padding-bottom:10px;font-family:'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:14px;text-align:center;mso-border-alt:none;word-break:keep-all;\"><span style=\"padding-left:40px;padding-right:40px;font-size:14px;display:inline-block;letter-spacing:normal;\"><span style=\"word-break:break-word;\"><span style=\"line-height: 28px;\" data-mce-style>Click to Verify</span></span></span></a><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></div>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"text_block block-8\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"padding-bottom:15px;padding-left:10px;padding-right:10px;padding-top:10px;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div style=\"font-family: Arial, sans-serif\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class style=\"font-size: 12px; font-family: 'Cabin', Arial, 'Helvetica Neue', Helvetica, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #393d47; line-height: 1.2;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 16.8px;\"><span style=\"font-size:10px;color:#aa67cf;\"><span style>If you didn't request to change your brand password, </span><span style>you don't have to do anything. So that's easy.</span></span></p>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"text_block block-9\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"text_block block-7\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"padding-bottom:20px;padding-left:10px;padding-right:10px;padding-top:10px;\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div style=\"font-family: sans-serif\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class style=\"font-size: 12px; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #8412c0; line-height: 1.2;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 16.8px;\"><span style=\"color:#8a3b8f;\">PDF Managment System&nbsp; © ·</span><span style> </span><span style><a href=\"http://"+link+"\" target=\"_blank\" style=\"text-decoration: underline; color: #8412c0;\" rel=\"noopener\">Unsuscribe</a></span></p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 16.8px;\"><span style=\"color:#8a3b8f;\">PDF Managment System&nbsp; © ·</span><span style> </span><span style><a href=\""+link+"\" target=\"_blank\" style=\"text-decoration: underline; color: #8412c0;\" rel=\"noopener\">Unsuscribe</a></span></p>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
@@ -410,7 +363,11 @@ public class AuthController {
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"alignment\" style=\"vertical-align: middle; text-align: center;\"><!--[if vml]><table align=\"left\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;\"><![endif]-->\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<!--[if !vml]><!-->\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"icons-inner\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\"><!--<![endif]-->\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td style=\"vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;\"><a href=\"https://www.designedwithbee.com/\" target=\"_blank\" style=\"text-decoration: none;\"><img class=\"icon\" alt=\"Designed with BEE\" src=\"https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/BeeProAgency/53601_510656/Signature/bee.png\" height=\"32\" width=\"34\" align=\"center\" style=\"display: block; height: auto; margin: 0 auto; border: 0;\"></a></td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td style=\"font-family: Arial, Helvetica Neue, Helvetica, sans-serif; font-size: 15px; color: #9d9d9d; vertical-align: middle; letter-spacing: undefined; text-align: center;\"><a href=\"https://www.designedwithbee.com/\" target=\"_blank\" style=\"color: #9d9d9d; text-decoration: none;\">Designed with BEE</a></td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
@@ -437,6 +394,28 @@ public class AuthController {
         helper.setText(content, true);
 
         mailSender.send(message);
+    }
+
+    @GetMapping("/verify")
+    public String verifyUser(@RequestParam("token") String verificationToken, Model model) {
+        User user = userService.verifyUser(verificationToken);
+
+        if (user != null) {
+            model.addAttribute("message", "User verification successful. You can log in Now.");
+        } else {
+            model.addAttribute("error", "Invalid verification token.");
+        }
+
+        return "login";
+    }
+
+
+    // handler method to handle list of users
+    @GetMapping("/users")
+    public String users(Model model){
+        List<UserDto> users = userService.findAllUsers();
+        model.addAttribute("users", users);
+        return "users";
     }
 
 
@@ -469,6 +448,7 @@ public class AuthController {
             return "error";
         } else {
             userService.updatePassword(customer, password);
+            userService.updateVerification(customer);
             model.addAttribute("message", "You have successfully changed your password.");
             return "login";
         }

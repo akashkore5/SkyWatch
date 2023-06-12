@@ -1,5 +1,6 @@
 package com.spotdraft.pdfmanagment.service;
 
+import com.spotdraft.pdfmanagment.exception.UserNotVerifiedException;
 import com.spotdraft.pdfmanagment.model.Role;
 import com.spotdraft.pdfmanagment.model.User;
 import com.spotdraft.pdfmanagment.repository.UserRepository;
@@ -33,15 +34,19 @@ public class CustomUserDetailsService implements UserDetailsService {
      * @throws UsernameNotFoundException if the user is not found
      */
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException,UserNotVerifiedException {
         User user = userRepository.findByEmail(email);
 
         if (user != null) {
-            return new org.springframework.security.core.userdetails.User(
-                    user.getEmail(),
-                    user.getPassword(),
-                    mapRolesToAuthorities(user.getRoles())
-            );
+            if (user.isVerified()) {
+                return new org.springframework.security.core.userdetails.User(
+                        user.getEmail(),
+                        user.getPassword(),
+                        mapRolesToAuthorities(user.getRoles())
+                );
+            } else {
+                throw new UserNotVerifiedException("User is not verified.");
+            }
         } else {
             throw new UsernameNotFoundException("Invalid username or password.");
         }

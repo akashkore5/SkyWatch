@@ -85,8 +85,7 @@ public class SpringSecurity {
         List<RequestMatcher> requestMatchers = Arrays.asList(
                 new AntPathRequestMatcher("/register/**"),
                 new AntPathRequestMatcher("/index"),
-                new AntPathRequestMatcher("/users"),
-                new AntPathRequestMatcher("/dashboard"),
+                new AntPathRequestMatcher("/verify"),
                 new AntPathRequestMatcher("/dashboard/**"),
                 new AntPathRequestMatcher("/shared/**"),
                 new AntPathRequestMatcher("/forgot_password"),

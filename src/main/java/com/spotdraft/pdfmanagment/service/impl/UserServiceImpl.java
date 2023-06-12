@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
      * @param userDto The UserDto containing user information.
      */
     @Override
-    public void saveUser(UserDto userDto) {
+    public void saveUser(UserDto userDto,String token) {
         User user = new User();
         user.setName(userDto.getFirstName() + " " + userDto.getLastName());
         user.setEmail(userDto.getEmail());
@@ -69,9 +69,12 @@ public class UserServiceImpl implements UserService {
         if (role == null) {
             role = checkRoleExist();
         }
+        user.setVerificationToken(token);
         user.setRoles(Arrays.asList(role));
+        user.setVerified(false);
         userRepository.save(user);
     }
+
 
     /**
      * Finds a user by their email address.
@@ -164,4 +167,42 @@ public class UserServiceImpl implements UserService {
         user.setResetPasswordToken(null);
         userRepository.save(user);
     }
+
+    @Override
+    public void verifyEmail(String email, String verificationCode) throws UserNotFoundException {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UserNotFoundException("Could not find any user with the email " + email);
+        }
+
+        // Implement your email verification logic here, e.g., compare the verification code with the one sent to the user's email
+
+        user.setVerified(true);
+        userRepository.save(user);
+    }
+
+    @Override
+    public User verifyUser(String verificationToken) {
+        User user = userRepository.findByVerificationToken(verificationToken);
+
+        if (user != null) {
+            user.setVerified(true);
+            user.setVerificationToken(null);
+            userRepository.save(user);
+        }
+
+        return user;
+    }
+
+    @Override
+    public boolean isVerified(User user) {
+        return user.isVerified();
+    }
+
+    @Override
+    public void updateVerification(User user) {
+        user.setVerified(true);
+    }
+
+
 }

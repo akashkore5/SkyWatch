@@ -132,10 +132,19 @@
                 <div class="card-header">
                     <h2 class="card-title">Registration</h2>
                 </div>
-                <div th:if="${param.success}">
+
+                <div class="alert alert-info">
+                    "Please use your original Email ! Need to verify to login ."
+                </div>
+
+                <div th:if="${message != null}">
                     <div class="alert alert-info">
                         You have successfully registered for our app!
                     </div>
+                </div>
+
+                <div th:if="${message != null}" class="alert alert-warning">
+                    [[${message}]]
                 </div>
                 <div class="card-body">
                     <form method="post" role="form" th:action="@{/register/save}" th:object="${user}">
@@ -144,7 +153,7 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
                                 <input class="form-control" id="firstName" name="firstName" placeholder="Enter first name"
-                                       th:field="*{firstName}" type="text" required>
+                                       th:field="*{firstName}" type="text" required pattern="^\S.+">
                             </div>
                             <p th:errors="*{firstName}" class="text-danger" th:if="${#fields.hasErrors('firstName')}"></p>
                         </div>
@@ -154,7 +163,7 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
                                 <input class="form-control" id="lastName" name="lastName" placeholder="Enter last name"
-                                       th:field="*{lastName}" type="text" required>
+                                       th:field="*{lastName}" type="text" required pattern="^\S.+">
                             </div>
                             <p th:errors="*{lastName}" class="text-danger" th:if="${#fields.hasErrors('lastName')}"></p>
                         </div>
@@ -199,21 +208,22 @@
 <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/js/all.min.js"></script>
 <script>
     function validateEmail() {
-        var email = document.getElementById("email").value;
-        var emailError = document.getElementById("emailError");
-        var submitButton = document.getElementById("submitButton");
+    var email = document.getElementById("email").value;
+    var emailError = document.getElementById("emailError");
+    var submitButton = document.getElementById("submitButton");
 
-        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email)) {
-            emailError.textContent = "Invalid email address!";
-            document.getElementById("email").classList.add("input-error");
-            submitButton.disabled = true;
-        } else {
-            emailError.textContent = "";
-            document.getElementById("email").classList.remove("input-error");
-            submitButton.disabled = false;
-        }
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email) || email.trim() === "") {
+        emailError.textContent = "Invalid email address!";
+        document.getElementById("email").classList.add("input-error");
+        submitButton.disabled = true;
+    } else {
+        emailError.textContent = "";
+        document.getElementById("email").classList.remove("input-error");
+        submitButton.disabled = false;
     }
+}
+
 
     document.getElementById("password").addEventListener("input", function () {
         checkPasswordRequirements();
