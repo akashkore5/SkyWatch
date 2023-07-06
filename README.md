@@ -1,8 +1,6 @@
 # PDF Management System
 [![Try Now](https://img.shields.io/badge/Try%20Now-Click%20Here-blue)](https://pdfmanagmentsystem-production.up.railway.app/)
 
-SpotDRAFT - Junior Software Engineer - Assignment
-
 PDF Management & Collaboration System
 
 ## Features
