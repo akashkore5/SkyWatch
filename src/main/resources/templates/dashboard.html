@@ -81,12 +81,43 @@
       bottom: 0;
       width: 100%;
     }
+    table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .forecast-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .forecast-cell {
+            flex-basis: calc(100% / 7);
+            text-align: center;
+        }
+
+        .forecast-cell:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
   </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" th:href="@{/dashboard}">PDF Management Dashboard</a>
+    <a class="navbar-brand" th:href="@{/dashboard}">SkyWatch</a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav ml-auto">
         <li class="nav-item">
@@ -100,93 +131,53 @@
 
   <div>
     <div class="alert alert-info">
-      "In the search section, you can search through all PDF files uploaded by all users. For trial purposes, using ".pdf" will retrieve all files."
+      "In the search section, you can search for any city weather details."
     </div>
   </div>
   <div class="row">
-    <div class="col-md-6">
-      <div class="dashboard-section">
-        <h2>Upload PDF File</h2>
-        <form method="post" action="/upload" enctype="multipart/form-data">
-          <div class="form-group">
-            <input type="file" name="file" required accept=".pdf" class="form-control">
-            <span class="error-message" th:if="${param.error}">Please upload a PDF file.</span>
-            <span class="error-message" th:if="${errorMessage}" th:text="${errorMessage}"></span>
-          </div>
-          <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
-      </div>
-      <div class="dashboard-section">
-        <h2>My PDF Files</h2>
-        <table>
-          <thead>
-          <tr>
-            <th>File Name</th>
-            <th>Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          <!-- Iterate over the list of PDF files uploaded by the user -->
-          <th:block th:each="pdfFile : ${userPdfFiles}">
-            <tr>
-              <td th:text="${pdfFile.fileName}"></td>
-              <td>
-                <!-- Download Link -->
-                <a th:href="@{/download/{fileId}(fileId=${pdfFile.id})}" class="btn btn-secondary">Download</a>
-                <!-- View Button -->
-                <a th:href="@{/view/{fileId}(fileId=${pdfFile.uniqueLink})}" class="btn btn-primary">View</a>
-              </td>
-            </tr>
-          </th:block>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="col-md-6">
       <div class="dashboard-section">
         <div class="search-form">
-          <h2>Search PDF Files</h2>
+          <h2>Search Weather Info</h2>
           <form method="get" action="/dashboard">
             <div class="form-group">
-              <input type="text" name="searchKeyword" placeholder="Search by File Name" class="form-control">
+              <input type="text" name="searchKeyword" placeholder="Search City Name" class="form-control">
             </div>
             <button type="submit" class="btn btn-primary">Search</button>
           </form>
         </div>
         <div class="dashboard-section">
-          <h2>Search Results</h2>
-          <table>
-            <thead>
-            <tr>
-              <th>File Name</th>
-              <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <!-- Iterate over the search results -->
-            <th:block th:each="pdfFile : ${searchResults}">
+          <h2>Weather Details</h2>
+          <div th:if="${forecastSummary != null}">
+            <table>
+              <thead>
               <tr>
-                <td th:text="${pdfFile.fileName}"></td>
-                <td>
-                  <!-- Download Link -->
-                  <a th:href="@{/download/{fileId}(fileId=${pdfFile.id})}" class="btn btn-secondary">Download</a>
-
-                  <a th:href="@{/view/{fileId}(fileId=${pdfFile.uniqueLink})}" class="btn btn-primary">View</a>
-                </td>
+                <th>Date</th>
+                <th>Sun Hours</th>
+                <th>Rain Hours</th>
+                <th>Min Temperature</th>
+                <th>Max Temperature</th>
               </tr>
-            </th:block>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+              <tr th:each="forecastDay : ${forecastSummary}">
+                <td th:text="${forecastDay.date}"></td>
+                <td th:text="${forecastDay.sunHours}"></td>
+                <td th:text="${forecastDay.rainHours}"></td>
+                <td th:text="${forecastDay.temperatureMin}"></td>
+                <td th:text="${forecastDay.temperatureMax}"></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
   </div>
 </div>
 
 
 <footer class="footer">
   <div class="container text-center">
-    <p>&copy; 2023 PDF Management & Collaboration System. All rights reserved.</p>
+    <p>&copy;SkyWatch:Weather Forecast Hub.</p>
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"

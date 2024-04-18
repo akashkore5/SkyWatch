@@ -8,11 +8,11 @@
 		<version>2.7.12</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.spotdraft</groupId>
-	<artifactId>pdfmanagment</artifactId>
+	<groupId>com.dice</groupId>
+	<artifactId>skywatch</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Pdf Managment System</name>
-	<description>Pdf Managment System</description>
+	<name>Skywatch</name>
+	<description> Ultimate Weather Forecast Hub</description>
 	<properties>
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
@@ -72,6 +72,16 @@
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.13.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vaadin.external.google</groupId>
+			<artifactId>android-json</artifactId>
+			<version>0.0.20131108.vaadin1</version>
 		</dependency>
 
 	</dependencies>
