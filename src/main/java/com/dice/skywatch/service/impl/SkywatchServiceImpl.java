@@ -35,7 +35,6 @@ public class SkywatchServiceImpl implements SkywatchService {
         String url = forecastSummaryUrl+location+"/summary/";
         System.out.println(url);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-
         ResponseEntity<String> rs = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         return rs.getBody();
     }

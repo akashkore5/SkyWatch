@@ -333,7 +333,7 @@ public class AuthController {
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"padding-bottom:20px;padding-left:10px;padding-right:10px;padding-top:10px;\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div style=\"font-family: sans-serif\">\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class style=\"font-size: 12px; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #8412c0; line-height: 1.2;\">\n" +
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 16.8px;\"><span style=\"color:#8a3b8f;\">PDF Managment System&nbsp; © ·</span><span style> </span><span style><a href=\""+link+"\" target=\"_blank\" style=\"text-decoration: underline; color: #8412c0;\" rel=\"noopener\">Unsuscribe</a></span></p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 16.8px;\"><span style=\"color:#8a3b8f;\"> SkyWatch &nbsp; © ·</span><span style> </span><span style><a href=\""+link+"\" target=\"_blank\" style=\"text-decoration: underline; color: #8412c0;\" rel=\"noopener\">Unsuscribe</a></span></p>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
                 "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
