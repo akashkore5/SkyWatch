@@ -3,6 +3,10 @@
 
 Weather Forecast System
 
+### Features
+-/forecast/{city}  will provide the weather data for 7 Days in json format
+-/hourlyForecast/{city}  will provide the hourly forecast in jason format
+
 ## Features
 
 ### 1. Introduction
@@ -12,19 +16,19 @@ Welcome to Skywatch Weather Forecasts, your go-to platform for accurate and deta
   - Get accurate weather forecasts for different locations.
   - View temperature, sun hours, rain hours, wind speed, and more.
 
-- ### Location-Based Forecasts
+### Location-Based Forecasts
   - Weather information is specific to the selected location.
   - Users can search for different locations to view their weather forecasts.
 
-- ### Responsive Design
+### Responsive Design
   - The application is responsive and works seamlessly on desktop and mobile devices.
   - Provides an optimal viewing experience across various screen sizes.
 
-- ### User-Friendly Interface
+### User-Friendly Interface
   - Intuitive user interface for easy navigation and interaction.
   - Clear presentation of weather data for quick understanding.
 
-- ### Detailed Weather Data
+### Detailed Weather Data
   - Access detailed weather data including wind direction, gusts, and precipitation probability.
   - Stay informed about weather conditions throughout the day.
 
@@ -39,6 +43,7 @@ Welcome to Skywatch Weather Forecasts, your go-to platform for accurate and deta
 - MYSQL Database
 - Java Spring Boot and its Modules
 - Railway Platform For Hosting
+- Rapid Api (Forecast Api)
 
 ## Try Now
 
