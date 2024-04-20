@@ -24,6 +24,17 @@ public class SpringSecurity {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Value("${rapidApi.host}")
+    private String host;
+
+    @Value("${rapidApi.key}")
+    private String key;
+
+    @Bean
+    public RestTemplate restTemplate(){
+        return  new RestTemplate();
+    }
+
     /**
      * Configures the password encoder to use BCrypt algorithm.
      *
@@ -87,16 +98,9 @@ public class SpringSecurity {
                 new AntPathRequestMatcher("/register/**"),
                 new AntPathRequestMatcher("/index"),
                 new AntPathRequestMatcher("/verify"),
-                new AntPathRequestMatcher("/view"),
-                new AntPathRequestMatcher("/dashboard"),
-                new AntPathRequestMatcher("/dashboard/**"),
-                new AntPathRequestMatcher("/shared/**"),
                 new AntPathRequestMatcher("/forgot_password"),
                 new AntPathRequestMatcher("/reset_password"),
-                new AntPathRequestMatcher("/comments/add"),
-                new AntPathRequestMatcher("/login"),
-                new AntPathRequestMatcher("/upload"),
-                new AntPathRequestMatcher("/download/**")
+                new AntPathRequestMatcher("/login")
         );
         return requestMatchers.toArray(new RequestMatcher[0]);
     }
@@ -113,17 +117,6 @@ public class SpringSecurity {
                 .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder());
     }
-    @Value("${rapidApi.host}")
-    private String host;
-
-    @Value("${rapidApi.key}")
-    private String key;
-
-    @Bean
-    public RestTemplate restTemplate(){
-        return  new RestTemplate();
-    }
-
     @Bean
     public HttpHeaders headers() {
         HttpHeaders headers = new HttpHeaders();

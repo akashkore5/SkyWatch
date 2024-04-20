@@ -35,13 +35,14 @@ public class SkywatchController {
         this.userRepository = userRepository;
         this.request = request;
     }
-    @GetMapping("/weather/forecastSummary")
+    @GetMapping("/forecast")
     public String getForecastSummary(@RequestParam String location) {
+        // Token authorizationnot needed as user already logged in
         return skywatchService.RapidApiGetForecastSummaryByLocationName(location);
     }
 
 
-    @GetMapping("/weather/hourlySummary")
+    @GetMapping("/hourlyForecast")
     public String getHourlyForecast(@RequestParam  String location){
         return skywatchService.RapidApiGetHourlyForecastByLocationName(location);
     }
