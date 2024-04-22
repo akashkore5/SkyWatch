@@ -39,6 +39,7 @@ Welcome to Skywatch Weather Forecasts, your go-to platform for accurate and deta
 
 ## Technical Details
 - HTML/CSS/JavaScript
+- JWT (JSON WEN TOKEN ) 
 - Thymeleaf
 - MYSQL Database
 - Java Spring Boot and its Modules
