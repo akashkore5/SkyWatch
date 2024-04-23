@@ -4,8 +4,8 @@
 Weather Forecast System
 
 ### Features
--/forecast/{city}  will provide the weather data for 7 Days in json format
--/hourlyForecast/{city}  will provide the hourly forecast in jason format
+  - /forecast/{city}  will provide the weather data for 7 Days in json format
+  - /hourlyForecast/{city}  will provide the hourly forecast in jason format
 
 ## Features
 
