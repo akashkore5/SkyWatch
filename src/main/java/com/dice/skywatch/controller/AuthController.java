@@ -1,8 +1,10 @@
 package com.dice.skywatch.controller;
 
 import com.dice.skywatch.dto.UserDto;
+import com.dice.skywatch.model.AuthRequest;
 import com.dice.skywatch.model.User;
 import com.dice.skywatch.service.UserService;
+import com.dice.skywatch.utility.JwtTokenUtil;
 import com.dice.skywatch.utility.Utility;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -16,13 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -35,10 +39,15 @@ public class AuthController {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     private UserService userService;
 
     private final HttpServletRequest request;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     public AuthController(UserService userService, HttpServletRequest request) {
         this.userService = userService;
@@ -68,6 +77,21 @@ public class AuthController {
         return "login";
     }
 
+    @PostMapping("/generateToken")
+    public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
+        if (authentication.isAuthenticated()) {
+            return JwtTokenUtil.generateToken(authRequest.getUsername());
+        } else {
+            throw new UsernameNotFoundException("invalid user request !");
+        }
+    }
+
+    @GetMapping("/user1")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public String userProfile() {
+        return "Welcome Auth";
+    }
     @PostMapping("/login")
     public String processLogin(@RequestParam(value = "targetUrl", required = false) String targetUrl, Model model,HttpServletRequest request) {
         // Perform the login logic here
@@ -82,6 +106,15 @@ public class AuthController {
             model.addAttribute("message", "Please verify your email address to login.");
             return "login";
         }
+
+//        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+//        if (authentication.isAuthenticated()) {
+//            model.addAttribute("jwtToken", jwtTokenUtil.generateToken(user.getEmail()));
+////            return jwtTokenUtil.generateToken(user.getEmail());
+//        } else {
+//            model.addAttribute("error", "Invalid UserId");
+////            throw new UsernameNotFoundException("Invalid UserId");
+//        }
 
         targetUrl = (String) session.getAttribute("targetUrl");
 //        if (targetUrl == null && targetUrl.isEmpty()) {

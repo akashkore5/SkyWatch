@@ -110,7 +110,7 @@
                     User is not verified. Verify your email.
                 </div>
                 <div class="alert alert-danger" th:unless="${param.error == 'UsernameNotFoundException'}">
-                    Invalid username or password.
+                    <span th:text="${#request.getAttribute('SPRING_SECURITY_LAST_EXCEPTION').message}"></span>
                 </div>
             </div>
             <div th:if="${param.logout}">

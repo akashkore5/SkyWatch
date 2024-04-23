@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +42,6 @@ public class SkywatchController {
         return skywatchService.RapidApiGetForecastSummaryByLocationName(location);
     }
 
-
     @GetMapping("/hourlyForecast")
     public String getHourlyForecast(@RequestParam  String location){
         return skywatchService.RapidApiGetHourlyForecastByLocationName(location);
@@ -58,6 +58,10 @@ public class SkywatchController {
 
             JSONObject jsonObject = new JSONObject(forecastSummary);
             JSONArray forecastArray = jsonObject.getJSONObject("forecast").getJSONArray("items");
+
+            // location , lat , lon , humidity
+
+
 
             List<Weather> forecastDays = new ArrayList<>();
             for (int i = 0; i < Math.min(forecastArray.length(), 7); i++) { // Loop through the first 7 days

@@ -48,7 +48,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 throw new UserNotVerifiedException("User is not verified.");
             }
         } else {
-            throw new UsernameNotFoundException("Invalid username or password.");
+            throw new UsernameNotFoundException("Bad Cred.");
         }
     }
 

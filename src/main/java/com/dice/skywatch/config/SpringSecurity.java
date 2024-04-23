@@ -1,15 +1,21 @@
 package com.dice.skywatch.config;
 
+import com.dice.skywatch.service.CustomUserDetailsService;
+import com.dice.skywatch.utility.JwtTokenFilter;
+import com.dice.skywatch.utility.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.client.RestTemplate;
@@ -29,6 +35,12 @@ public class SpringSecurity {
 
     @Value("${rapidApi.key}")
     private String key;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration}")
+    private long jwtExpirationMs;
 
     @Bean
     public RestTemplate restTemplate(){
@@ -63,6 +75,8 @@ public class SpringSecurity {
                                 .requestMatchers(new AntPathRequestMatcher("/")).hasRole("ADMIN")
                                 // All other URLs require authentication
                                 .anyRequest().authenticated()
+                                .and()
+                                .addFilterBefore(new JwtTokenFilter(jwtSecret,jwtExpirationMs, (CustomUserDetailsService) userDetailsService), UsernamePasswordAuthenticationFilter.class)
                 )
                 .formLogin(
                         form -> form
@@ -100,6 +114,7 @@ public class SpringSecurity {
                 new AntPathRequestMatcher("/verify"),
                 new AntPathRequestMatcher("/forgot_password"),
                 new AntPathRequestMatcher("/reset_password"),
+                new AntPathRequestMatcher("/generateToken"),
                 new AntPathRequestMatcher("/login")
         );
         return requestMatchers.toArray(new RequestMatcher[0]);
@@ -123,5 +138,16 @@ public class SpringSecurity {
         headers.set("x-rapidApi-host", host);
         headers.set("x-rapidApi-key", key);
         return headers;
+    }
+
+
+    @Bean
+    public JwtTokenFilter jwtTokenFilter() {
+        return new JwtTokenFilter(jwtSecret, jwtExpirationMs, (CustomUserDetailsService) userDetailsService);
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }
