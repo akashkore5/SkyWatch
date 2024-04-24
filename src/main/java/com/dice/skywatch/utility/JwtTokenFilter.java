@@ -2,12 +2,10 @@ package com.dice.skywatch.utility;
 
 import com.dice.skywatch.model.User;
 import com.dice.skywatch.service.CustomUserDetailsService;
-import com.dice.skywatch.service.UserService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -35,7 +33,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (jwtToken != null && jwtTokenUtil.validateToken(jwtToken)) {
             String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
             if (username != null) {
-                User user = (User) userService.loadUserByUsername(username); // Assuming UserService has a method to find user by email
+                User user = userService.loadUserByUsername(username); // Assuming UserService has a method to find user by email
                 if (user != null && user.isVerified()) { // Check if user exists and is verified
                     List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
                             .map(role -> new SimpleGrantedAuthority(role.getName()))

@@ -1,4 +1,5 @@
 package com.dice.skywatch.utility;
+import com.dice.skywatch.exception.InvalidTokenException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -42,7 +43,7 @@ public class JwtTokenUtil {
             return true;
         } catch (Exception e) {
             // Token validation failed
-            return false;
+            throw new InvalidTokenException("Invalid Token");
         }
     }
 

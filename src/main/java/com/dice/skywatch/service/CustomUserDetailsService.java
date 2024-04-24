@@ -6,7 +6,6 @@ import com.dice.skywatch.model.User;
 import com.dice.skywatch.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -34,16 +33,12 @@ public class CustomUserDetailsService implements UserDetailsService {
      * @throws UsernameNotFoundException if the user is not found
      */
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException,UserNotVerifiedException {
+    public User loadUserByUsername(String email) throws UsernameNotFoundException,UserNotVerifiedException {
         User user = userRepository.findByEmail(email);
 
         if (user != null) {
             if (user.isVerified()) {
-                return new org.springframework.security.core.userdetails.User(
-                        user.getEmail(),
-                        user.getPassword(),
-                        mapRolesToAuthorities(user.getRoles())
-                );
+                return user;
             } else {
                 throw new UserNotVerifiedException("User is not verified.");
             }

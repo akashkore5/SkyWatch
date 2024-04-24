@@ -16,6 +16,8 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,19 +80,31 @@ public class AuthController {
     }
 
     @PostMapping("/generateToken")
-    public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<String> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         if (authentication.isAuthenticated()) {
-            return JwtTokenUtil.generateToken(authRequest.getUsername());
+//            return JwtTokenUtil.generateToken(authRequest.getUsername());
+
+            return ResponseEntity.status(HttpStatus.OK).body(JwtTokenUtil.generateToken(authRequest.getUsername()));
         } else {
             throw new UsernameNotFoundException("invalid user request !");
         }
     }
 
-    @GetMapping("/user1")
+    @GetMapping("/welcome")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public String userProfile() {
-        return "Welcome Auth";
+    public ResponseEntity<String> userProfile() {
+        return ResponseEntity.status(HttpStatus.OK).body("Welcome !!!");
+    }
+
+    @GetMapping("/unauthorized")
+    public ResponseEntity<String> unauthorized() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized !!!");
+    }
+
+    @GetMapping("/invalidToken")
+    public ResponseEntity<String> invalidToken() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token !!!");
     }
     @PostMapping("/login")
     public String processLogin(@RequestParam(value = "targetUrl", required = false) String targetUrl, Model model,HttpServletRequest request) {
