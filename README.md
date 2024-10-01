@@ -38,6 +38,8 @@ Welcome to Skywatch Weather Forecasts, your go-to platform for accurate and deta
 ### 1. User Signup and Authentication
 - User authentication supports features like password reset and account recovery.
 
+### 2. User file upload and download options
+
 ## Technical Details
 - HTML/CSS/JavaScript
 - JWT (JSON WEN TOKEN ) 
