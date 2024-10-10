@@ -13,4 +13,6 @@ public interface SkywatchService {
     public  String RapidApiGetHourlyForecastByLocationName(String location);
     
     public  String RapidApiGetDailyForecastByLocationName(String location);
+    
+    public  String RapidApiGetWeeklyForecastByLocationName(String location);
 }
